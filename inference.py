@@ -17,7 +17,40 @@ API_BASE_URL = os.getenv("API_BASE_URL")
 MODEL_NAME = os.getenv("MODEL_NAME")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+import os
+import torch
+import random
+from typing import List
+
+from openai import OpenAI
+
+from server.music_recommendation_environment import MusicRecommendationEnv
+from models import MusicRecommendationAction
+from agent.dqn_agent import DQN
+
+
+# ----------------------------
+# CONFIG
+# ----------------------------
+API_BASE_URL = os.getenv("API_BASE_URL")
+MODEL_NAME = os.getenv("MODEL_NAME")
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+# ✅ DEBUG (NOW SAFE)
+print("Starting inference...", flush=True)
+print("API_BASE_URL:", API_BASE_URL, flush=True)
+print("MODEL_NAME:", MODEL_NAME, flush=True)
+print("HF_TOKEN exists:", HF_TOKEN is not None, flush=True)
+
+
+# SAFE CLIENT
+client = None
+if API_BASE_URL and HF_TOKEN:
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+# 🔥 SAFE CLIENT INITIALIZATION
+client = None
+if API_BASE_URL and HF_TOKEN:
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
 TASK_NAME = "music-recommendation"
 BENCHMARK = "openenv-music"
@@ -66,16 +99,19 @@ def encode(state, catalog):
 
 
 # ----------------------------
-# LLM HINT (LIGHTWEIGHT)
+# LLM HINT (SAFE)
 # ----------------------------
 def get_llm_genre_hint(obs):
+    if client is None:
+        return None  # fallback safely
+
     try:
         response = client.chat.completions.create(
             model=MODEL_NAME,
             messages=[
                 {
                     "role": "system",
-                    "content": "Given a list of track IDs, suggest a music genre (one word).",
+                    "content": "Suggest a music genre (one word).",
                 },
                 {
                     "role": "user",
@@ -128,27 +164,24 @@ def main():
 
             action_id = None
 
-            # 🔥 DQN FIRST, LLM ONLY HELPS
+            # 🔥 DQN FIRST, LLM ONLY ASSISTS
             for idx in sorted_indices:
                 candidate = action_list[idx.item()]
 
-                # avoid repeating same track
                 if candidate == obs.history[-1]:
                     continue
 
                 action_id = candidate  # default DQN choice
 
-                # if LLM agrees → accept immediately
                 if llm_genre:
                     track = env.catalog[candidate]
                     if llm_genre in track["genre"]:
                         break
 
-            # fallback
             if action_id is None:
                 action_id = random.choice(action_list)
 
-            # small exploration (prevents loops)
+            # small exploration
             if random.random() < 0.05:
                 action_id = random.choice(action_list)
 
