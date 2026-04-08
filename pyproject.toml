@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openenv-music_recommendation"
+version = "0.1.0"
+description = "Music Recommendation environment for OpenEnv"
+requires-python = ">=3.10"
+
+dependencies = [
+    "openenv-core==0.2.2",
+    "torch==2.1.0",
+    "numpy==1.26.4"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[project.scripts]
+server = "music_recommendation.server.app:main"
+
+[tool.setuptools]
+include-package-data = true
+packages = ["music_recommendation", "music_recommendation.server"]
+package-dir = { "music_recommendation" = ".", "music_recommendation.server" = "server" }
