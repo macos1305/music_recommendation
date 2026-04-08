@@ -35,17 +35,12 @@ except Exception as e:  # pragma: no cover
         "openenv is required for the web interface. Install dependencies with '\n    uv sync\n'"
     ) from e
 
-try:
-    from ..models import MusicRecommendationAction, MusicRecommendationObservation
-    from .music_recommendation_environment import MusicRecommendationEnvironment
-except ModuleNotFoundError:
-    from models import MusicRecommendationAction, MusicRecommendationObservation
-    from server.music_recommendation_environment import MusicRecommendationEnvironment
-
+from models import MusicRecommendationAction, MusicRecommendationObservation
+from server.music_recommendation_environment import MusicRecommendationEnv
 
 # Create the app with web interface and README integration
 app = create_app(
-    MusicRecommendationEnvironment,
+    MusicRecommendationEnv,
     MusicRecommendationAction,
     MusicRecommendationObservation,
     env_name="music_recommendation",
