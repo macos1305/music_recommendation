@@ -26,7 +26,7 @@ ENV UV_HTTP_TIMEOUT=300
 RUN uv pip install openenv-core==0.2.2 numpy==1.26.4
 
 # Install torch CPU version
-RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
+RUN pip install torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu
 
 ENV PYTHONPATH="/app/env:$PYTHONPATH"
 
