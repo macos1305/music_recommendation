@@ -20,11 +20,13 @@ RUN if ! command -v uv >/dev/null 2>&1; then \
 RUN --mount=type=cache,target=/root/.cache/uv \
     UV_HTTP_TIMEOUT=300 uv sync
 
-# 🔥 Force install everything correctly
-RUN uv pip install openenv-core==0.2.2 numpy==1.26.4 torch==2.1.0
+# Increase timeout for uv
+ENV UV_HTTP_TIMEOUT=300
 
-# Ensure torch is installed (fallback safety)
-RUN uv pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cpu
+RUN uv pip install openenv-core==0.2.2 numpy==1.26.4
+
+# Install torch CPU version
+RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 
 ENV PYTHONPATH="/app/env:$PYTHONPATH"
 
